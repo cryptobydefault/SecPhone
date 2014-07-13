@@ -1,0 +1,101 @@
+<?xml version="1.0"?>
+
+<project name="sphone" default="compile" basedir=".">
+
+	<property environment="env" />
+
+	<property name="src" value="src" />
+	<property name="build" value="." />
+	<property name="web.inf" value="${build}/WEB-INF" />
+	<property name="classes" value="${web.inf}/classes" />
+	<property name="doc" value="doc" />
+	<property name="web.lib" value="${web.inf}/lib" />
+	<property name="ext.lib" value="ext/lib" />
+	<property name="war" value="dist/snmail.war" />
+
+	<property name="jdk.home" value="${env.JAVA_HOME}" />
+	<property name="tomcat.home" value="${env.CATALINA_HOME}" />
+	<property name="tomcat-windows.home" value="${env.CATALINA_HOME_WINDOWS}" />
+
+	<property name="compile.debug" value="true"/>
+	<property name="compile.deprecation" value="false"/>
+	<property name="compile.optimize" value="true"/>
+
+  <path id="compile.classpath">
+    <pathelement location="${tomcat.home}/lib/servlet-api.jar"/>
+    <pathelement location="${tomcat-windows.home}\lib\servlet-api.jar"/>
+		<fileset dir="${ext.lib}">
+			<include name="*.jar" />
+		</fileset>
+  </path>
+
+  <path id="run.classpath">
+		<fileset dir="${web.lib}">
+			<include name="*.jar" />
+		</fileset>
+  </path>
+
+	<target name="prepare">
+		<mkdir dir="${web.lib}" />
+		<mkdir dir="${web.inf}/classes" />
+		<mkdir dir="${doc}" />
+
+		<copy todir="${web.lib}">
+			<fileset dir="${ext.lib}">
+				<include name="*.jar" />
+			</fileset>
+		</copy>
+
+		<copy todir="${classes}/com/secphone/persist">
+			<fileset dir="${src}/com/secphone/persist">
+				<include name="*.hbm.*" />
+			</fileset>
+		</copy>
+
+		<copy todir="${web.inf}" file="etc/web.xml" />
+		<copy todir="${classes}" file="etc/hibernate.properties" />
+		<copy todir="${classes}" file="etc/hibernate.cfg.xml" />
+		<copy todir="${classes}" file="etc/log4j.properties" />
+	</target>
+
+	<target name="compile" depends="prepare">
+		<javac 
+			includeantruntime="false"
+			srcdir="${src}"
+			destdir="${classes}"
+      debug="${compile.debug}"
+      deprecation="${compile.deprecation}"
+      optimize="${compile.optimize}">
+      <classpath refid="compile.classpath"/>
+		<compilerarg value="-Xlint" />
+		</javac>
+	</target>
+
+	<target name="dist" depends="compile">
+		<delete file="${war}" />
+		<mkdir dir="dist" />
+		<jar destfile="${war}" basedir="." 
+				 excludes="build.xml,notes/**,work/**,dist/**,src/**,doc/**,**/CVS,**/CVS/**" />
+	</target>
+
+	<target name="javadoc">
+		<javadoc packagenames="lsn.*"
+		         sourcepath="${src}" 
+						 extdirs="${web.lib}"
+						 destdir="${doc}" />
+	</target>
+
+	<target name="clean">
+		<delete dir="${web.inf}" />
+		<delete dir="${doc}" />
+		<delete dir="dist" />
+		<delete dir="work" />
+	</target>
+	
+	<target name="run" depends="compile">
+		<java classpath="WEB-INF/classes" 
+				classpathref="run.classpath" 
+				classname="com.secphone.Main">
+		</java>
+	</target>
+</project>

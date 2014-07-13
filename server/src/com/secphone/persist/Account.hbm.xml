@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.secphone.persist.Account" table="account">
+		<id name="id" column="ACCOUNT_ID">
+			<generator class="native" />
+  		</id>
+  		<property name="email"/>
+  		<property name="name"/>
+  		<property name="status"/>
+  		<property name="validationCode"/>
+  		<property name="publicKeys">
+			<column name="publicKeys" length="20000" />
+		</property>
+	</class>	
+	<query name="accountByEmail"><![CDATA[
+		from Account account where account.email = :email
+	]]></query>	
+</hibernate-mapping>

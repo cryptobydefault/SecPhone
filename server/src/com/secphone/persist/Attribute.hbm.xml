@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="ll.mesh.persist.Attribute" table="attribute">
+		<id name="attributeId" column="ATTRIBUTE_ID">
+			<generator class="native" />
+  		</id>
+  		<property name="mkey"/>
+  		<property name="mval"/>
+  		<property name="mopaque"/>
+		<many-to-one name="app" class="ll.mesh.persist.App" lazy="false" fetch="select">
+			<column name="APP_ID" not-null="true" />
+		</many-to-one>
+	</class>	
+</hibernate-mapping>

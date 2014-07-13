@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC 
+	"-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+	"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping>
+	<class name="com.secphone.persist.Message" table="message">
+		<id name="id" column="MESSAGE_ID">
+			<generator class="native" />
+  		</id>
+  		<property name="meFrom"/>
+  		<property name="meTo"/>
+  		<property name="meTimestamp"/>
+  		<property name="meType"/>
+  		<property name="meSubject" type="text"/>
+  		<property name="meContent" type="text"/>
+	</class>	
+	<query name="messageByTo"><![CDATA[
+		from Message message where message.meTo = :to
+	]]></query>	
+</hibernate-mapping>

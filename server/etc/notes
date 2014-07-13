@@ -1,0 +1,5 @@
+to register a new app, use curl:
+
+curl -X POST --data @etc/post.txt http://localhost:8080/mesh/admin/registerapp
+with ex. post.txt file:  {"email":"yes@no.com","password":"secret","name":"Some Other App"}
+
