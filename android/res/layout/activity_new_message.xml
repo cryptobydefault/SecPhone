@@ -1,0 +1,56 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"                   
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".NewMessageActivity" >    
+        
+    <EditText
+        android:id="@+id/newMessageTo"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:hint="Send to"
+        android:inputType="text"
+        android:textSize="24sp" >
+    </EditText>
+    
+    <EditText
+        android:id="@+id/newMessageSubject"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:hint="Subject"
+        android:inputType="text"
+        android:textSize="24sp" >
+    </EditText>
+    
+    <EditText
+        android:id="@+id/newMessageBody"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:hint="Message"
+        android:inputType="text"
+        android:textSize="24sp" >
+    </EditText>
+        
+    <Button
+        android:id="@+id/newMessageSubmit"
+        android:layout_width="262dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:onClick="newMessageSubmit"
+        android:text="Send" />    
+</LinearLayout>

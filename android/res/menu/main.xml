@@ -1,0 +1,35 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.secphone.LandingActivity" >
+
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:title="@string/action_settings"
+        app:showAsAction="never"/>
+    
+    <item
+        android:id="@+id/send_public_key"
+        android:orderInCategory="100"
+        android:title="Send Public Key"
+        app:showAsAction="never"/>
+
+    <item
+        android:id="@+id/send_secret_key"
+        android:orderInCategory="100"
+        android:title="Send Secret Key"
+        app:showAsAction="never"/>
+    
+    <item
+        android:id="@+id/send_encrypted"
+        android:orderInCategory="100"
+        android:title="Send Signed Message"
+        app:showAsAction="never"/>
+    
+    <item
+        android:id="@+id/logout"
+        android:orderInCategory="100"
+        android:title="Log out"
+        app:showAsAction="never"/>
+</menu>

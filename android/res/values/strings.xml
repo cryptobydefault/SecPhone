@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">SecPhone05</string>
+    <string name="hello_world">Hello there, world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="url_base">http://66.228.50.110:8080/sphone/api/</string>
+    <string name="preferences">UserState</string>
+    
+    <string name="mail_transport_protocol">smtp</string>
+    <string name="mail_server">mailserver.com</string>
+    <string name="mail_server_port">465</string>
+    <string name="mail_server_username">username</string>
+    
+    <!-- XXX we need some way to NOT hard-code this... -->
+    <string name="mail_server_password">password</string>
+
+</resources>
