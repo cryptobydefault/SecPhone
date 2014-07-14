@@ -79,10 +79,10 @@
 	</target>
 
 	<target name="javadoc">
-		<javadoc packagenames="lsn.*"
-		         sourcepath="${src}" 
-						 extdirs="${web.lib}"
-						 destdir="${doc}" />
+		<javadoc sourcepath="${src}" 
+				 destdir="${doc}">
+			<classpath refid="compile.classpath"/>
+		</javadoc>
 	</target>
 
 	<target name="clean">

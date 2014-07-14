@@ -4,7 +4,11 @@ import java.util.*;
 import org.hibernate.*;
 import org.hibernate.cfg.*;
 
-class Persist {
+/**
+ * Helper file for persisting objects with Hibernate.  Yes, Java Data Objects
+ * (such as Account and Message) should really subclass this...
+ */
+public class Persist {
 	static SessionFactory sessionFactory = null;
 	
 	static {
@@ -14,12 +18,23 @@ class Persist {
 			.buildSessionFactory();
 	}
 	
+	/**
+	 * Empty constructor.  Note that a new SessionFactory is created via the "static"
+	 * method when creating new Persist instances.
+	 */
 	protected Persist() { }
 	
 	protected Session getSession() {
 		return sessionFactory.openSession();
 	}
 	
+	/**
+	 * @param query name of query, as defined in .hbm.xml file
+	 * @param params map of key/value pairs passed to query
+	 * @param isList should return a list (as opposed to a single item)
+	 * @param max if returning a list, what is max returned records (0 for no max)
+	 * @return list if isList is set to true, otherwise object relevant to query
+	 */
 	protected Object doNamedQuery(String query, Map<String, Object> params, boolean isList, int max) {
 		Session session = sessionFactory.openSession();
 		Query q = session.getNamedQuery(query);
