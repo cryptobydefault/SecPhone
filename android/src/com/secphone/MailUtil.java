@@ -21,7 +21,6 @@ import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
 
-import org.apache.http.HttpResponse;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.spongycastle.openpgp.PGPPublicKey;
@@ -30,6 +29,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 public class MailUtil {
@@ -37,11 +38,13 @@ public class MailUtil {
 	
 	final String openPgpType = "multipart/encrypted; boundary=BOUNDARY;\r\n\tprotocol=\"application/pgp-encrypted\"";
 	
-	Session session;
-	Activity activity;
+	Session 	session;
+	Activity 	activity;
+	Handler		handler;
 		
-	public MailUtil(Activity a) {
+	public MailUtil(Activity a, Handler h) {
 		this.activity = a;
+		this.handler = h;
 		
 		Authenticator authenticator = new Authenticator() {
 			private PasswordAuthentication authentication;
@@ -66,36 +69,41 @@ public class MailUtil {
 		session = Session.getDefaultInstance(props, authenticator);
 	}
 	
-	String encrypt(String email, String in) {
-		PGPPublicKey publicKey = (new CryptoUtil()).getPublicKeyBlocking(activity, email);
-		if (publicKey == null) {
-			Log.w(SPHONE, "no public key: " + email);
-			return null;
-		}
+	void sendEncrypted(String from, String to, String subject, String content) {
+		String command = "getPublicKeys";
 		
-		Crypto crypto = new Crypto(publicKey);		
-		return new String(crypto.encrypt(true, in.getBytes()));
-	}
-	
-	public void sendEncrypted(String f, String t, String s, String c) {
-		final String from = f;
-		final String to = t;
-		final String subject = s;
-		final String content = c;
-		
-		new Thread(new Runnable() {
-			public void run() {	
-				// try {
-					// sendEncryptedBlocking(from, to, subject, content);
-					postEncryptedBlocking(from, to, subject, content);
-				// } catch(MessagingException e) { Log.w(SPHONE, "messaging exception: " + e.getMessage()); }
+		final String f = from;
+		final String t = to;
+		final String s = subject;
+		final String c = content;
+		NetworkTask.NetworkCallback ncb = new NetworkTask.NetworkCallback() {
+			public void doCallback(int code, String message) {
+				Log.d(SPHONE, "postEncrypted() doCallback()");
+				
+				if (code != 200) {
+					Log.w(SPHONE, "code is: " + code);
+					Util.simpleAlert(activity, message);
+					return;
+				}
+
+				PGPPublicKey publicKey = (new CryptoUtil()).parsePublicKey(2, message);
+				
+				doPost(publicKey, f, t, s, c);
 			}
-		}).start();
+		};
+		
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("email",  to);
+		
+		NetworkTask networkTask = new NetworkTask(activity, command, NetworkTask.METHOD_GET, ncb, null, params);
+		networkTask.execute(new String());
 	}
-	
-	void postEncryptedBlocking(String from, String to, String subject, String content) {
-		String encryptedSubject = encrypt(to, subject);
-		String encryptedContent = encrypt(to, content);
+		
+	void doPost(PGPPublicKey publicKey, String from, String to, String subject, String content) {
+		Crypto crypto = new Crypto(publicKey);
+
+		String encryptedSubject = new String(crypto.encrypt(true, subject.getBytes()));
+		String encryptedContent = new String(crypto.encrypt(true, content.getBytes()));
 		
 		JSONObject json = new JSONObject();
 		try {
@@ -110,14 +118,14 @@ public class MailUtil {
 				
 		final Activity a = activity;
 		NetworkTask.NetworkCallback ncb = new NetworkTask.NetworkCallback() {
-			public void doCallback(HttpResponse response, String message) {
-				if (response.getStatusLine().getStatusCode() != 200) {
+			public void doCallback(int code, String message) {
+				if (code != 200) {
 					Log.w(SPHONE, "got error on sending message: " + message);
 					
 					Util.simpleAlert(a, "Error: " + message);
 					
 					return;
-				}	
+				} else handler.handleMessage(null);
 			}
 		};
 		
@@ -149,7 +157,10 @@ public class MailUtil {
 	    multiPart.addBodyPart(textPart);
 
 	    MimeBodyPart htmlPart = new MimeBodyPart();
-		String encrypted = encrypt(to, c);
+		
+	    // String encrypted = encrypt(to, c);
+	    String encrypted = null;
+	    
 	    htmlPart.setContent(encrypted, "application/octet-stream");
 	    multiPart.addBodyPart(htmlPart);
 	    
@@ -192,7 +203,10 @@ public class MailUtil {
 	    multiPart.addBodyPart(textPart);
 
 	    MimeBodyPart htmlPart = new MimeBodyPart();
-		String encrypted = encrypt(to, c);
+	    
+		// String encrypted = encrypt(to, c);
+	    String encrypted = null;
+	    
 	    htmlPart.setContent(encrypted, "application/octet-stream");
 	    multiPart.addBodyPart(htmlPart);
 	    

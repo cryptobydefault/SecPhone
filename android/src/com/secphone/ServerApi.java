@@ -20,7 +20,7 @@ public class ServerApi {
 	public interface Callback {
 		public void callback(Map<String, Object> params);
 	}
-	
+/*	
 	public void getStatus(String email, Callback callback) {
 		String command = "getAccountStatus";
 		
@@ -48,7 +48,7 @@ public class ServerApi {
 		NetworkTask networkTask = new NetworkTask(activity, command, NetworkTask.METHOD_GET, ncb, null, params);
 		networkTask.execute(new String());		
 	}
-	
+*/	
 	void someCrap() {
 	/*
 		ServerApi serverApi = new ServerApi(this);

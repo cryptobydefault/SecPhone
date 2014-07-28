@@ -8,8 +8,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.spongycastle.bcpg.ArmoredOutputStream;
 import org.spongycastle.openpgp.PGPPublicKey;
 import org.spongycastle.openpgp.PGPPublicKeyRing;
@@ -39,7 +37,7 @@ public class CryptoUtil {
 	}
 	
 	// returns n'th public key
-	PGPPublicKey parsePublicKey(int n, String in) {
+	public PGPPublicKey parsePublicKey(int n, String in) {
 		Log.d(SPHONE, "in: " + in);
 		try {
 			InputStream is = PGPUtil.getDecoderStream(new ByteArrayInputStream(in.getBytes()));
@@ -67,31 +65,7 @@ public class CryptoUtil {
 		
 		return null;
 	}
-	
-	// make blocking call to network to get public key associated with email
-	public PGPPublicKey getPublicKeyBlocking(Activity a, String email) {
-		String command = "getPublicKeys";
 		
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("email",  email);
-		
-		NetworkTask networkTask = new NetworkTask(a, command, NetworkTask.METHOD_GET, null, null, params);
-		HttpResponse res = networkTask.doBlocking();
-		
-		String message = null;
-		HttpEntity entity = res.getEntity();
-		if (entity != null) {
-			try {
-				InputStream is = entity.getContent();
-				message = NetworkTask.readFromNetwork(is);
-			} catch(IOException e) { Log.w(SPHONE, "IO: " + e.getMessage()); }
-		}
-		
-		Log.w(SPHONE, "got back: " + message);
-		
-		return parsePublicKey(2, message);
-	}
-	
 	// if master key has a supported algorithm, return that
 	// otherwise return first key found with supporting algorithm
 	public PGPSecretKey readSecretKeyFromRing(InputStream israw) {
@@ -199,14 +173,14 @@ public class CryptoUtil {
 				
 		final Activity a = activity;
 		NetworkTask.NetworkCallback ncb = new NetworkTask.NetworkCallback() {
-			public void doCallback(HttpResponse response, String message) {
-				if (response.getStatusLine().getStatusCode() != 200) {
+			public void doCallback(int code, String message) {
+				if (code != 200) {
 					Log.w(SPHONE, "got error on sending keys: " + message);
 					
 					Util.simpleAlert(a, "Error: " + message);
 					
 					return;
-				}	
+				}
 			}
 		};
 		
@@ -227,14 +201,14 @@ public class CryptoUtil {
 				
 		final Activity a = activity;
 		NetworkTask.NetworkCallback ncb = new NetworkTask.NetworkCallback() {
-			public void doCallback(HttpResponse response, String message) {
-				if (response.getStatusLine().getStatusCode() != 200) {
+			public void doCallback(int code, String message) {
+				if (code != 200) {
 					Log.w(SPHONE, "got error on sending public key: " + message);
 					
 					Util.simpleAlert(a, "Error: " + message);
 					
 					return;
-				}	
+				}
 			}
 		};
 		

@@ -56,7 +56,10 @@ public class CryptoTest {
 	void testFlow() {
 		Log.v(SPHONE, "creating keys...");
 		Crypto crypto1 = new Crypto();
-		crypto1.generateKeys(2.0, new Crypto.RSAKeyParams("user1@email.com", "pass1"));
+		
+		byte[] seed = new byte[1];
+		seed[0] = (byte) 'a';
+		crypto1.generateKeys(seed, new Crypto.RSAKeyParams("user1@email.com", "pass1"));
 		
 		// Crypto crypto2 = new Crypto();
 		// crypto2.generateKeys(3.0, new Crypto.RSAKeyParams("user2@email.com", "pass2"));
@@ -73,14 +76,14 @@ public class CryptoTest {
 		String command = "writeKeys";
 		
 		NetworkTask.NetworkCallback ncb = new NetworkTask.NetworkCallback() {
-			public void doCallback(HttpResponse response, String message) {
-				if (response.getStatusLine().getStatusCode() != 200) {
+			public void doCallback(int code, String message) {
+				if (code != 200) {
 					Log.w(SPHONE, "got error on sending data: " + message);
 					
 					Util.simpleAlert(activity, "Error: " + message);
 					
 					return;
-				}	
+				}
 			}
 		};
 		
@@ -101,16 +104,7 @@ public class CryptoTest {
 		params.put("file",  file);
 		
 		NetworkTask networkTask = new NetworkTask(activity, command, NetworkTask.METHOD_GET, null, null, params);
-		HttpResponse res = networkTask.doBlocking();
-		
-		String message = null;
-		HttpEntity entity = res.getEntity();
-		if (entity != null) {
-			try {
-				InputStream is = entity.getContent();
-				message = NetworkTask.readFromNetwork(is);
-			} catch(IOException e) { Log.w(SPHONE, "IO: " + e.getMessage()); }
-		}
+		String message = networkTask.doBlocking().body;
 		
 		return message;
 	}

@@ -23,6 +23,8 @@ public class GenerateKeysActivity extends ActionBarActivity {
 	private ProgressBar mProgress;
 	private int mProgressStatus = 0;
 	Activity activity = this;
+	
+	private static final int RANDOM_BYTES = 100;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -32,22 +34,25 @@ public class GenerateKeysActivity extends ActionBarActivity {
 		setContentView(R.layout.activity_generate_keys);
 		
 		final ImageView image = (ImageView) findViewById(R.id.randomGenerator);
-		final Activity activity = this;
+		
+		mProgressStatus = 0;
+		
 		image.setOnTouchListener(new OnTouchListener() {
-			double runningTotal = 0.0;
-			
+			byte[] randomBytes = new byte[RANDOM_BYTES];
+
 			@Override
 			public boolean onTouch(View arg0, MotionEvent me) {
 				// XXX obviously we need to do analysis on this, set bounds, etc.
-				runningTotal += me.getRawX() + me.getRawY();
-				
+				int bits = Float.floatToIntBits(me.getRawX() * me.getRawY());
+				randomBytes[mProgressStatus] = (byte) (bits & 0xff);
+						
 				mProgressStatus++;
 				mProgress.setProgress(mProgressStatus);
 				
-				if (mProgressStatus >= 100) {
+				if (mProgressStatus >= RANDOM_BYTES) {
 					image.setOnTouchListener(null);
 
-					getPassphrase(runningTotal);
+					getPassphrase(randomBytes);
 				}
 				
 				return true;
@@ -73,7 +78,7 @@ public class GenerateKeysActivity extends ActionBarActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-	void getPassphrase(double seed) {
+	void getPassphrase(byte[] seed) {
 		AlertDialog.Builder alert = new AlertDialog.Builder(this);
 
 		alert.setTitle("");
@@ -82,7 +87,7 @@ public class GenerateKeysActivity extends ActionBarActivity {
 		final EditText input = new EditText(this);
 		alert.setView(input);
 
-		final double s = seed;
+		final byte[] s = seed;
 		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int whichButton) {
 				Log.v(SPHONE, "onClick()");
@@ -121,7 +126,7 @@ public class GenerateKeysActivity extends ActionBarActivity {
 		alert.show();
 	}
 	
-	void generateKeys(double seed, String passphrase) {
+	void generateKeys(byte[] seed, String passphrase) {
 		Log.v(SPHONE, "generateKeys()");
 
 		Crypto crypto = new Crypto();

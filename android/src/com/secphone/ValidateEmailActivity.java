@@ -50,15 +50,15 @@ public class ValidateEmailActivity extends Activity {
 		
 		final Activity activity = this;		
 		NetworkTask.NetworkCallback ncb = new NetworkTask.NetworkCallback() {
-			public void doCallback(HttpResponse response, String message) {
-				if (response.getStatusLine().getStatusCode() != 200) {
+			public void doCallback(int code, String message) {
+				if (code != 200) {
 					Log.w(SPHONE, "got error on sending validation email: " + message);
 					
 					Util.simpleAlert(activity, "Error: " + message);
 					
 					return;
 				}	
-				
+
 				setResult(RESULT_OK);
 				finish();
 			}

@@ -88,16 +88,14 @@ public class LandingActivity extends Activity {
 		
 		final Activity activity = this;		
 		NetworkTask.NetworkCallback ncb = new NetworkTask.NetworkCallback() {
-			public void doCallback(HttpResponse response, String message) {
+			public void doCallback(int code, String message) {
 				Log.d(SPHONE, "getEmailStatus() doCallback()");
-				
-				if (response.getStatusLine().getStatusCode() != 200) {
-					Log.w(SPHONE, "got error on get status: " + message);
-				}		
-				
+		
 				message = message.trim();
 				int status = -1;
-				if (response.getStatusLine().getStatusCode() == 200) status = Integer.parseInt(message);
+				
+				// XXX server returns 200 only if email found...
+				if (code == 200) status = Integer.parseInt(message);
 				
 				Log.d(SPHONE, "status: " + status);
 				
@@ -132,11 +130,11 @@ public class LandingActivity extends Activity {
 		
 		final Activity activity = this;		
 		NetworkTask.NetworkCallback ncb = new NetworkTask.NetworkCallback() {
-			public void doCallback(HttpResponse response, String message) {
-				if (response.getStatusLine().getStatusCode() != 200) {
+			public void doCallback(int code, String message) {
+				if (code != 200) {
 					Log.w(SPHONE, "got error on register: " + message);
 				}				
-				
+
 				sendValidationEmail();
 			}
 		};
@@ -154,11 +152,11 @@ public class LandingActivity extends Activity {
 		
 		final Activity activity = this;		
 		NetworkTask.NetworkCallback ncb = new NetworkTask.NetworkCallback() {
-			public void doCallback(HttpResponse response, String message) {
-				if (response.getStatusLine().getStatusCode() != 200) {
+			public void doCallback(int code, String message) {
+				if (code != 200) {
 					Log.w(SPHONE, "got error on sending validation email: " + message);
 				}				
-			
+
 				Intent intent = new Intent(activity, ValidateEmailActivity.class);
 				startActivityForResult(intent, VALIDATE_EMAIL_ACTIVITY);
 			}

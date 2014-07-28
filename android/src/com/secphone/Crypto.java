@@ -1,10 +1,7 @@
 package com.secphone;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigInteger;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
@@ -13,8 +10,6 @@ import java.util.Date;
 
 import javax.crypto.Cipher;
 
-import org.spongycastle.bcpg.ArmoredInputStream;
-import org.spongycastle.bcpg.ArmoredOutputStream;
 import org.spongycastle.bcpg.HashAlgorithmTags;
 import org.spongycastle.crypto.AsymmetricCipherKeyPair;
 import org.spongycastle.crypto.generators.RSAKeyPairGenerator;
@@ -105,20 +100,6 @@ public class Crypto {
 			if (! asciiArmor) return ret;
 			
 			return Util.addAsciiArmor(ret);
-		/*	
-	        ByteArrayOutputStream bOut = new ByteArrayOutputStream();
-	        ArmoredOutputStream aOut = new ArmoredOutputStream(bOut);
-
-	        try {
-	        	aOut.write(ret);
-	        	aOut.close();
-	        } catch(IOException e) { 
-	        	Log.w(SPHONE, "IO exception: " + e.getMessage()); 
-	        	return null;
-	        }
-	        
-	        return bOut.toByteArray();
-	    */
 		} catch(Exception e) { Log.w(SPHONE, "encrypt error: " + e.getMessage()); }
 		
 		return null;
@@ -146,19 +127,20 @@ public class Crypto {
 			if (ascii) in = Util.removeAsciiArmor(in);
 			
 			return rsaCipher.doFinal(in);
-		} catch(Exception e) { Log.w(SPHONE, "decrypt error: " + e.getMessage()); }
-		
-		return null;
+		} catch(Exception e) { 
+			Log.w(SPHONE, "decrypt error: " + e.getMessage());
+			return null;
+		}
 	}
 
 	// See:  spongycastle/pg/src/test/java/org/spongycastle/openpgp/test/BcPGPRSATest.java
-	public void generateKeys(double inputSeed, RSAKeyParams params) {
+	public void generateKeys(byte[] inputSeed, RSAKeyParams params) {
 		char[] cPassPhrase = params.passphrase.toCharArray();
 
 		RSAKeyPairGenerator kpg = new RSAKeyPairGenerator();
 		try {
-			kpg.init(new RSAKeyGenerationParameters(new BigInteger("10001", 16),
-		        SecureRandom.getInstance("SHA1PRNG"), 2048, 80));
+			// kpg.init(new RSAKeyGenerationParameters(new BigInteger("10001", 16), SecureRandom.getInstance("SHA1PRNG"), 2048, 80));
+			kpg.init(new RSAKeyGenerationParameters(new BigInteger("10001", 16), new SecureRandom(inputSeed), 2048, 80));
 			
 			AsymmetricCipherKeyPair kpSgn = kpg.generateKeyPair();
 			AsymmetricCipherKeyPair kpEnc = kpg.generateKeyPair();
@@ -173,7 +155,7 @@ public class Crypto {
 	                null, null, new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, HashAlgorithmTags.SHA1), 
 	                new BcPBESecretKeyEncryptorBuilder(PGPEncryptedData.AES_256).build(cPassPhrase));
 	        
-	        // keyRingGen.addSubKey(encKeyPair, null, null);
+	        // keyRingGen.addSubKey(sgnKeyPair, null, null);
 	        
 	        byte[] encodedSecretKeyRing = keyRingGen.generateSecretKeyRing().getEncoded();
 	        secretKeyRing = new PGPSecretKeyRing(encodedSecretKeyRing, new BcKeyFingerprintCalculator());
@@ -184,7 +166,7 @@ public class Crypto {
 	        secretKey = secretKeyRing.getSecretKey();
 	        publicKey = secretKey.getPublicKey();
 		} 
-		catch(NoSuchAlgorithmException e) { Log.w(SPHONE, "unuspported algorithm"); }
+		// catch(NoSuchAlgorithmException e) { Log.w(SPHONE, "unuspported algorithm"); }
 		catch(PGPException e) { Log.w(SPHONE, "PGP exception: " + e.getMessage()); }
 		catch(IOException e) { Log.w(SPHONE, "IO exception: " + e.getMessage()); }
 	}	
