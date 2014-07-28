@@ -6,6 +6,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Security;
+import java.security.Signature;
 import java.util.Date;
 
 import javax.crypto.Cipher;
@@ -133,6 +134,47 @@ public class Crypto {
 		}
 	}
 	
+	public byte[] sign(boolean ascii, byte[] in, String passphrase) {
+		try {
+			PGPSecretKey secretKey = (new CryptoUtil(publicKeyRing, secretKeyRing)).extractSigningKey();
+			PGPPrivateKey pk = secretKey.extractPrivateKey(passphrase.toCharArray(), "SC");
+		
+			JcaPGPKeyConverter converter = new JcaPGPKeyConverter();
+			PrivateKey k = converter.getPrivateKey(pk);
+		
+			Signature signer = Signature.getInstance("SHA1withRSA");
+			signer.initSign(k);
+			signer.update(in);
+		
+			byte[] ret = signer.sign();
+			if (! ascii) return ret;
+			
+			return Util.addAsciiArmor(ret);
+		} catch(Exception e) { 
+			Log.w(SPHONE, "sign exception: " + e);
+			return null;
+		}
+	}
+	
+	public boolean verify(boolean ascii, byte[] data, byte[] sig) {
+		try {
+			PGPPublicKey publicKey = (new CryptoUtil(publicKeyRing, secretKeyRing)).extractVerifyingKey();
+			JcaPGPKeyConverter converter = new JcaPGPKeyConverter();
+			PublicKey k = converter.getPublicKey(publicKey);
+			
+			if (ascii) sig = Util.removeAsciiArmor(sig);
+
+		    Signature signer = Signature.getInstance("SHA1withRSA");
+		    signer.initVerify(k);
+		    signer.update(data);
+		    
+		    return signer.verify(sig);
+		} catch(Exception e) {
+			Log.w(SPHONE, "verify exception: " + e);
+			return false;
+		}
+	}
+	
 	// See:  spongycastle/pg/src/test/java/org/spongycastle/openpgp/test/BcPGPRSATest.java
 	public void generateKeys(byte[] inputSeed, RSAKeyParams params) {
 		char[] cPassPhrase = params.passphrase.toCharArray();
@@ -155,7 +197,7 @@ public class Crypto {
 	                null, null, new BcPGPContentSignerBuilder(PGPPublicKey.RSA_GENERAL, HashAlgorithmTags.SHA1), 
 	                new BcPBESecretKeyEncryptorBuilder(PGPEncryptedData.AES_256).build(cPassPhrase));
 	        
-	        // keyRingGen.addSubKey(sgnKeyPair, null, null);
+	        keyRingGen.addSubKey(sgnKeyPair, null, null);
 	        
 	        byte[] encodedSecretKeyRing = keyRingGen.generateSecretKeyRing().getEncoded();
 	        secretKeyRing = new PGPSecretKeyRing(encodedSecretKeyRing, new BcKeyFingerprintCalculator());
