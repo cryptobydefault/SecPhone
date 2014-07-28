@@ -41,7 +41,16 @@ public class CryptoUtil {
 		default: return false;
 		}
 	}
-	
+
+	boolean isSigningAlgorithm(int algorithm) {
+		switch(algorithm) {
+		case PGPPublicKey.ELGAMAL_GENERAL: return true;
+		case PGPPublicKey.RSA_SIGN: return true;
+		case PGPPublicKey.RSA_GENERAL: return true;
+		default: return false;
+		}
+	}
+
 	PGPPublicKey extractEncryptingKey() {
 		if (publicKeyRing == null) {
 			Log.w(SPHONE, "no public key ring");
@@ -72,6 +81,36 @@ public class CryptoUtil {
 		return null;		
 	}
 	
+	PGPSecretKey extractSigningKey() {
+		if (secretKeyRing == null) {
+			Log.w(SPHONE, "no secret key ring");
+			return null;
+		}
+		
+		Iterator it = secretKeyRing.getSecretKeys();
+		while (it.hasNext()) {
+			PGPSecretKey secKey = (PGPSecretKey) it.next();
+			if (isSigningAlgorithm(secKey.getPublicKey().getAlgorithm())) return secKey;
+		}
+		
+		return null;		
+	}
+	
+	PGPPublicKey extractVerifyingKey() {
+		if (publicKeyRing == null) {
+			Log.w(SPHONE, "no public key ring");
+			return null;
+		}
+		
+		Iterator it = publicKeyRing.getPublicKeys();
+		while (it.hasNext()) {
+			PGPPublicKey pubKey = (PGPPublicKey) it.next();
+			if (isSigningAlgorithm(pubKey.getAlgorithm())) return pubKey;
+		}
+		
+		return null;		
+	}
+
 	public static void backupKeys(Context context, Crypto crypto) {
 		try {
 			byte[] publicAscii = Util.addAsciiArmor(crypto.publicKeyRing.getEncoded());
