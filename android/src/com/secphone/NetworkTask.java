@@ -12,7 +12,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 
-import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -28,7 +28,6 @@ public class NetworkTask extends AsyncTask<String, Integer, NetworkTaskResponse>
 	
 	String url_base;
 	
-	Activity activity;
 	String command;
 	int method;
 	NetworkCallback callback;
@@ -45,8 +44,8 @@ public class NetworkTask extends AsyncTask<String, Integer, NetworkTaskResponse>
 		}
 	}
 		
-	public NetworkTask(Activity activity, String command, int method, NetworkCallback callback, String body, Map<String, String> params) {
-		url_base = activity.getString(R.string.url_base);
+	public NetworkTask(Context context, String command, int method, NetworkCallback callback, String body, Map<String, String> params) {
+		url_base = context.getString(R.string.url_base);
 		
 		this.command = command;
 		this.method = method;

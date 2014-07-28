@@ -131,11 +131,12 @@ public class HomeActivity extends ListActivity {
 	void loadValues() {
 		String[] ret = new String[array.length()];
 		EmailListItem[] items = new EmailListItem[array.length()];
-		
+/*		
 		Crypto crypto = new Crypto();
 		CryptoUtil cryptoUtil = new CryptoUtil();
 		cryptoUtil.loadKeys(crypto, this);
-		
+*/
+		Crypto crypto = CryptoUtil.loadKeysFromFlash(this);
 		
 		try {
 			for (int i = 0; i < array.length(); i++) {

@@ -36,12 +36,9 @@ import android.util.Log;
 
 public class Crypto {
 	private static final String SPHONE = "sphone";
-
-	private PGPPublicKey publicKey = null;
-	private PGPSecretKey secretKey = null;
 	
-	private PGPPublicKeyRing publicKeyRing = null;
-	private PGPSecretKeyRing secretKeyRing = null;
+	PGPPublicKeyRing publicKeyRing = null;
+	PGPSecretKeyRing secretKeyRing = null;
 	
 	public static class RSAKeyParams {
 		public RSAKeyParams(String i, String p) {
@@ -53,21 +50,24 @@ public class Crypto {
 		String passphrase;
 	}
 	
-	public Crypto() { 
+	public Crypto() {
 		Security.addProvider(new BouncyCastleProvider());
 	}
 	
-	public Crypto(PGPPublicKey p) {
-		Security.addProvider(new BouncyCastleProvider());
-
-		this.publicKey = p;
+	public Crypto(PGPPublicKeyRing ring) {
+		this();
+		this.publicKeyRing = ring;
 	}
 	
-	public Crypto(PGPSecretKey s) {
-		Security.addProvider(new BouncyCastleProvider());
-		
-		this.secretKey = s;
-		this.publicKey = s.getPublicKey();
+	public Crypto(PGPSecretKeyRing ring) {
+		this();
+		this.secretKeyRing = ring;
+	}
+	
+	public Crypto(PGPPublicKeyRing p, PGPSecretKeyRing s) {
+		this();
+		this.publicKeyRing = p;
+		this.secretKeyRing = s;
 	}
 	
 	String getCipher(int algorithm) {
@@ -78,9 +78,9 @@ public class Crypto {
 		
 		return null;
 	}
-		
+	
 	public byte[] encrypt(boolean asciiArmor, byte[] in) {
-		if (publicKey == null) return null;
+		PGPPublicKey publicKey = (new CryptoUtil(publicKeyRing, secretKeyRing)).extractEncryptingKey();
 		
 		try {
 			String cipher = getCipher(publicKey.getAlgorithm());
@@ -106,7 +106,7 @@ public class Crypto {
 	}
 	
 	public byte[] decrypt(boolean ascii, byte[] in, String passphrase) {
-		if (secretKey == null) return null;
+		PGPSecretKey secretKey = (new CryptoUtil(publicKeyRing, secretKeyRing)).extractDecryptingKey();
 		
 		try {
 			PGPPrivateKey pk = secretKey.extractPrivateKey(passphrase.toCharArray(), "SC");
@@ -115,9 +115,9 @@ public class Crypto {
 			PrivateKey k = converter.getPrivateKey(pk);
 			Log.v(SPHONE, "alg: " + k.getAlgorithm() + ", format: " + k.getFormat() + ", class: " + k.getClass());
 			
-			String cipher = getCipher(publicKey.getAlgorithm());
+			String cipher = getCipher(secretKey.getPublicKey().getAlgorithm());
 			if (cipher == null) {
-				Log.w(SPHONE, "unsupported cipher: " + publicKey.getAlgorithm());
+				Log.w(SPHONE, "unsupported cipher: " + secretKey.getPublicKey().getAlgorithm());
 				return null;
 			}
 			
@@ -132,7 +132,7 @@ public class Crypto {
 			return null;
 		}
 	}
-
+	
 	// See:  spongycastle/pg/src/test/java/org/spongycastle/openpgp/test/BcPGPRSATest.java
 	public void generateKeys(byte[] inputSeed, RSAKeyParams params) {
 		char[] cPassPhrase = params.passphrase.toCharArray();
@@ -162,24 +162,9 @@ public class Crypto {
 	        
 	        byte[] encodedPublicKeyRing = keyRingGen.generatePublicKeyRing().getEncoded();
 	        publicKeyRing = new PGPPublicKeyRing(encodedPublicKeyRing, new BcKeyFingerprintCalculator());
-    
-	        secretKey = secretKeyRing.getSecretKey();
-	        publicKey = secretKey.getPublicKey();
 		} 
 		// catch(NoSuchAlgorithmException e) { Log.w(SPHONE, "unuspported algorithm"); }
 		catch(PGPException e) { Log.w(SPHONE, "PGP exception: " + e.getMessage()); }
 		catch(IOException e) { Log.w(SPHONE, "IO exception: " + e.getMessage()); }
 	}	
-
-	public void setPublicKey(PGPPublicKey p) { this.publicKey = p; }
-	public PGPPublicKey getPublicKey() { return publicKey; }
-	
-	public void setSecretKey(PGPSecretKey p) { this.secretKey = p; }
-	public PGPSecretKey getSecretKey() { return secretKey; }	
-	
-	public void setSecretKeyRing(PGPSecretKeyRing r) { this.secretKeyRing = r; }
-	public PGPSecretKeyRing getSecretKeyRing() { return secretKeyRing; }
-	
-	public void setPublicKeyRing(PGPPublicKeyRing r) { this.publicKeyRing = r; }
-	public PGPPublicKeyRing getPublicKeyRing() { return publicKeyRing; }
 }

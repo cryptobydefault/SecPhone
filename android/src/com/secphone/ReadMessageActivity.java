@@ -39,9 +39,7 @@ public class ReadMessageActivity extends Activity {
 	void setValues() {	
 		((TextView) findViewById(R.id.messageFrom)).setText(from);
 
-		Crypto crypto = new Crypto();
-		CryptoUtil cryptoUtil = new CryptoUtil();
-		cryptoUtil.loadKeys(crypto, this);
+		Crypto crypto = CryptoUtil.loadKeysFromFlash(this);
 		
 		byte[] sClear = crypto.decrypt(true, subject.getBytes(), passphrase);
 		if (sClear == null) {

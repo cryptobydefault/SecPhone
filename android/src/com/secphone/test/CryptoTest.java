@@ -2,29 +2,23 @@ package com.secphone.test;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
 import org.spongycastle.bcpg.ArmoredInputStream;
 import org.spongycastle.bcpg.CompressionAlgorithmTags;
 import org.spongycastle.openpgp.PGPCompressedDataGenerator;
 import org.spongycastle.openpgp.PGPLiteralData;
 import org.spongycastle.openpgp.PGPLiteralDataGenerator;
-import org.spongycastle.openpgp.PGPPublicKey;
-import org.spongycastle.openpgp.PGPSecretKey;
 
 import android.app.Activity;
 import android.util.Log;
 
 import com.secphone.Crypto;
 import com.secphone.CryptoUtil;
-import com.secphone.MailUtil;
 import com.secphone.NetworkTask;
 import com.secphone.Util;
 
@@ -135,9 +129,7 @@ public class CryptoTest {
 	}
 		
 	void testDecrypt(String in) {
-		Crypto crypto = new Crypto();
-		CryptoUtil cryptoUtil = new CryptoUtil();
-		cryptoUtil.loadKeys(crypto, activity);
+		Crypto crypto = CryptoUtil.loadKeysFromFlash(activity);
 		
 		try {
 			InputStream is = new ByteArrayInputStream(in.getBytes());
@@ -154,39 +146,16 @@ public class CryptoTest {
 			Log.v(SPHONE, new String(dec));
 		} catch(Exception e) { Log.w(SPHONE, "error: " + e.toString()); }
 	}
-		
-	void encryptDecrypt(PGPSecretKey secretKey, String in) {
-		Log.d(SPHONE, "encryptDecrypt()");
-		
-		Crypto crypto = new Crypto(secretKey);
-		
-		byte[] enc = crypto.encrypt(false, in.getBytes());
-		Log.d(SPHONE, "encrypt done");
-		byte[] dec = crypto.decrypt(false, enc, PASSPHRASE);
-		
-		Log.d(SPHONE, new String(dec));
-	}
-	
+			
 	void encryptDecrypt(String in) {
 		Log.d(SPHONE, "encryptDecrypt()");
-		
-		Crypto crypto = new Crypto();
-		(new CryptoUtil()).loadKeys(crypto, activity);
+				
+		Crypto crypto = CryptoUtil.loadKeysFromFlash(activity);
 		
 		byte[] enc = crypto.encrypt(false, in.getBytes());
 		Log.d(SPHONE, "encrypt done");
 		byte[] dec = crypto.decrypt(false, enc, PASSPHRASE);
 		
 		Log.d(SPHONE, new String(dec));
-	}
-
-	void twoKeys(Activity activity, PGPSecretKey sKey, PGPPublicKey pKey, String in) {
-		Crypto crypto1 = new Crypto(pKey);
-		byte[] enc = crypto1.encrypt(false, in.getBytes());
-		
-		Crypto crypto2 = new Crypto(sKey);
-		byte[] dec = crypto2.decrypt(false, enc, PASSPHRASE);
-		
-		Log.v(SPHONE, new String(dec));
 	}
 }

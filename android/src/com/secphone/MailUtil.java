@@ -23,14 +23,12 @@ import javax.mail.util.ByteArrayDataSource;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.spongycastle.openpgp.PGPPublicKey;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 
 public class MailUtil {
@@ -86,9 +84,11 @@ public class MailUtil {
 					return;
 				}
 
-				PGPPublicKey publicKey = (new CryptoUtil()).parsePublicKey(2, message);
+				// PGPPublicKey publicKey = (new CryptoUtil()).parsePublicKey(2, message);				
+				// doPost(publicKey, f, t, s, c);
 				
-				doPost(publicKey, f, t, s, c);
+				Crypto crypto = new Crypto(CryptoUtil.parsePublicKeyRing(message));
+				doPost(crypto, f, t, s, c);
 			}
 		};
 		
@@ -99,8 +99,8 @@ public class MailUtil {
 		networkTask.execute(new String());
 	}
 		
-	void doPost(PGPPublicKey publicKey, String from, String to, String subject, String content) {
-		Crypto crypto = new Crypto(publicKey);
+	void doPost(Crypto crypto, String from, String to, String subject, String content) {
+		// Crypto crypto = new Crypto(publicKey);
 
 		String encryptedSubject = new String(crypto.encrypt(true, subject.getBytes()));
 		String encryptedContent = new String(crypto.encrypt(true, content.getBytes()));

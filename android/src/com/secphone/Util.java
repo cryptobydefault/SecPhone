@@ -9,6 +9,7 @@ import org.spongycastle.bcpg.ArmoredOutputStream;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
@@ -21,8 +22,8 @@ public class Util {
 		return true;
 	}
 	
-	public static void simpleAlert(Activity activity, String message) {
-		AlertDialog.Builder builder = new AlertDialog.Builder(activity);
+	public static void simpleAlert(Context context, String message) {
+		AlertDialog.Builder builder = new AlertDialog.Builder(context);
 		
 		builder.setTitle(message);
 		builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {

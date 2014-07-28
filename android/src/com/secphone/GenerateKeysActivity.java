@@ -131,10 +131,12 @@ public class GenerateKeysActivity extends ActionBarActivity {
 
 		Crypto crypto = new Crypto();
 		crypto.generateKeys(seed, new Crypto.RSAKeyParams("email@email.com", passphrase));
-		
+/*		
 		CryptoUtil cryptoUtil = new CryptoUtil();
 		cryptoUtil.saveKeys(crypto, this);
 		cryptoUtil.postKeys(this);		
+*/
+		CryptoUtil.backupKeys(this, crypto);
 		
 		setResult(RESULT_OK);
 		finish();
