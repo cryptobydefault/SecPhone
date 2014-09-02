@@ -11,19 +11,19 @@
 	<property name="doc" value="doc" />
 	<property name="web.lib" value="${web.inf}/lib" />
 	<property name="ext.lib" value="ext/lib" />
+	<property name="ext.tomcat" value="ext/tomcat" />
 	<property name="war" value="dist/snmail.war" />
 
 	<property name="jdk.home" value="${env.JAVA_HOME}" />
-	<property name="tomcat.home" value="${env.CATALINA_HOME}" />
-	<property name="tomcat-windows.home" value="${env.CATALINA_HOME_WINDOWS}" />
 
 	<property name="compile.debug" value="true"/>
 	<property name="compile.deprecation" value="false"/>
 	<property name="compile.optimize" value="true"/>
 
   <path id="compile.classpath">
-    <pathelement location="${tomcat.home}/lib/servlet-api.jar"/>
-    <pathelement location="${tomcat-windows.home}\lib\servlet-api.jar"/>
+		<fileset dir="${ext.tomcat}">
+			<include name="*.jar" />
+		</fileset>
 		<fileset dir="${ext.lib}">
 			<include name="*.jar" />
 		</fileset>
